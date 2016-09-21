@@ -41,8 +41,8 @@
 		</Linker>
 		<Unit filename="glue.cpp" />
 		<Unit filename="glue.hpp" />
-		<Unit filename="prenom-nom.cpp" />
-		<Unit filename="prenom-nom.hpp" />
+		<Unit filename="arnaud-cojez.cpp" />
+		<Unit filename="arnaud-cojez.hpp" />
 		<Unit filename="stereo-matching.cpp" />
 		<Extensions>
 			<code_completion />

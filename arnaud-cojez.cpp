@@ -25,7 +25,7 @@ Inclure les fichiers d'entete
 #include <opencv2/highgui/highgui.hpp>
 using namespace cv;
 #include "glue.hpp"
-#include "prenom-nom.hpp"
+#include "arnaud-cojez.hpp"
 
 // -----------------------------------------------------------------------
 /// \brief Detecte les coins.
@@ -55,7 +55,17 @@ Mat iviDetectCorners(const Mat& mImage,
 // -----------------------------------------------------------------------
 Mat iviVectorProductMatrix(const Mat& v) {
     // A modifier !
-    Mat mVectorProduct = Mat::eye(3, 3, CV_64F);
+    double vx = v.at<double>(0);
+    double vy = v.at<double>(1);
+    double vz = v.at<double>(2);
+
+    //Cours 2 p15
+    Mat mVectorProduct = (Mat_<double>(3, 3) <<
+       0., -vz,  vy,
+       vz,  0., -vx,
+      -vy,  vx,  0.
+    );
+
     // Retour de la matrice
     return mVectorProduct;
 }

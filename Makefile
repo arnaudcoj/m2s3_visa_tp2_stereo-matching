@@ -7,6 +7,9 @@ OBJ= $(TARGET:.cpp=.o)
 
 all: stereo-matching
 
+execute: stereo-matching
+	./stereo-matching left.png right.png left.xml right.xml -d
+
 stereo-matching: $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
