@@ -14,5 +14,4 @@ stereo-matching: $(OBJ)
 	$(CC) -o $@ -c $< $(CFLAGS) $(INCLUDES)
 
 clean:
-	rm *.o
-
+	rm *.o stereo-matching
