@@ -54,12 +54,11 @@ Mat iviDetectCorners(const Mat& mImage,
 /// @return matrice de produit vectoriel
 // -----------------------------------------------------------------------
 Mat iviVectorProductMatrix(const Mat& v) {
-    // A modifier !
     double vx = v.at<double>(0);
     double vy = v.at<double>(1);
     double vz = v.at<double>(2);
 
-    //Cours 2 p15
+    //Cours 2 p15, on créé le p*
     Mat mVectorProduct = (Mat_<double>(3, 3) <<
        0., -vz,  vy,
        vz,  0., -vx,
@@ -83,9 +82,28 @@ Mat iviFundamentalMatrix(const Mat& mLeftIntrinsic,
                          const Mat& mLeftExtrinsic,
                          const Mat& mRightIntrinsic,
                          const Mat& mRightExtrinsic) {
-    // A modifier !
+
+    Mat reduc = (Mat_<double>(3,4) <<
+       1.0, 0.0, 0.0, 0.0,
+       0.0, 1.0, 0.0, 0.0,
+       0.0, 0.0, 1.0, 0.0
+       );
+    Mat pLeft = mLeftIntrinsic * reduc * mLeftExtrinsic;
+    Mat pRight = mRightIntrinsic * reduc * mRightExtrinsic;
+
+    Mat invPLeft = pLeft.inv(DECOMP_SVD);
+
+    Mat h = pRight * invPLeft;
+
+    Mat mInvLeftExtrinsic = mLeftExtrinsic.inv();
+
+    Mat o1 = mInvLeftExtrinsic.col(3);
+
+
     // Doit utiliser la fonction iviVectorProductMatrix
-    Mat mFundamental = Mat::eye(3, 3, CV_64F);
+    Mat p201 = pRight * o1;
+    Mat p201x = iviVectorProductMatrix(p201);
+    Mat mFundamental =  p201x * pRight * invPLeft;
     // Retour de la matrice fondamentale
     return mFundamental;
 }
