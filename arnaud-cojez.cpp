@@ -36,13 +36,16 @@ using namespace cv;
 // -----------------------------------------------------------------------
 Mat iviDetectCorners(const Mat& mImage,
                      int iMaxCorners) {
-    // A modifier !
-    double tx = mImage.cols, ty = mImage.rows;
-    Mat mCorners = (Mat_<double>(3,4) <<
-        .25 * tx, .75 * tx, .25 * tx, .75 * tx,
-        .25 * ty, .25 * ty, .75 * ty, .75 * ty,
-        1., 1., 1., 1.
-        );
+    vector<Point2f> vCorners;
+
+    goodFeaturesToTrack(mImage, vCorners, iMaxCorners, 0.01, 10);
+
+    Mat mCorners(3, int(vCorners.size()), CV_64F);
+    for (unsigned int i = 0; i < vCorners.size(); i++) {
+      mCorners.at<double>(0,i) = (double)vCorners[i].x;
+      mCorners.at<double>(1,i) = (double)vCorners[i].y;
+      mCorners.at<double>(2,i) = 1.;
+    }
     // Retour de la matrice
     return mCorners;
 }

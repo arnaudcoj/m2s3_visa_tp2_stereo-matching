@@ -4,7 +4,7 @@ LIBS=
 INCLUDES= -I/usr/include
 TARGET= $(wildcard *.cpp)
 OBJ= $(TARGET:.cpp=.o)
-CFLAGS= -g
+CFLAGS= -g -std=c++11
 
 all: stereo-matching
 
