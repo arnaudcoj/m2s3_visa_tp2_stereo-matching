@@ -124,8 +124,36 @@ Mat iviDistancesMatrix(const Mat& m2DLeftCorners,
                        const Mat& m2DRightCorners,
                        const Mat& mFundamental) {
     // A modifier !
-    Mat mDistances = Mat();
-    // Retour de la matrice fondamentale
+    Mat mDistances = Mat(m2DLeftCorners.cols, m2DRightCorners.cols, CV_64F);
+
+        for(int i = 0; i < m2DLeftCorners.cols; i++) {
+          for(int j = 0; j < m2DRightCorners.cols; j++) {
+              Mat mLeft = m2DLeftCorners.col(i);
+              Mat mRight = m2DLeftCorners.col(j);
+              Mat dLeft = mFundamental * mLeft;
+              Mat dRight = mFundamental.t() * mRight;
+
+              double aRight = dRight.at<double>(0,0);
+              double bRight = dRight.at<double>(1,0);
+              double cRight = dRight.at<double>(2,0);
+
+              double xLeft = mLeft.at<double>(0,0);
+              double yLeft = mLeft.at<double>(1,0);
+
+              double aLeft = dLeft.at<double>(0,0);
+              double bLeft = dLeft.at<double>(1,0);
+              double cLeft = dLeft.at<double>(2,0);
+
+              double xRight = mRight.at<double>(0,0);
+              double yRight = mRight.at<double>(1,0);
+
+              double distance1 = fabs(aLeft * xRight + bLeft * yRight + cLeft) / sqrt(aRight * aRight + bRight * bRight);
+
+              double distance2 = fabs(aRight * xLeft + bRight * yLeft + cRight) / sqrt(aLeft * aLeft + bLeft * bLeft);
+
+              mDistances.at<double>(i,j) = distance1 + distance2;
+          }
+        }
     return mDistances;
 }
 
