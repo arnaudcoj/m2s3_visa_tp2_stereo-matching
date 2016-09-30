@@ -23,6 +23,7 @@
 \section{Introduction}
 
 \subsection{Motivation}
+
 La photographie permet de récupérer et de conserver les données liées à une scène, à un instant donné. Cependant, les données récupérées correspondent à la projection de la scène sur un plan 2D. Par conséquent, nous observons une perte d'information, notamment au niveau de la profondeur.\\
 
 Il existe différents moyens de pallier à ce problème. Ceux-ci sont plus ou moins efficaces, et plus ou moins simples à mettre en œuvre.\\
@@ -38,7 +39,7 @@ Parmi les méthodes éparses, nous trouvons la méthode de la stéréoscopie. C'
 
 Cette méthode consiste à interpréter 2 (ou plus) projections d'une même scène, avec des points de vue différents afin d'estimer la profondeur des objets dans la-dite scène.\\
 
-L'avantage de cette méthode est qu'elle est peu complexe (calculs sur quelques points remarquables sélectionnés) et facile à mettre en œuvre (2 images sont suffisantes afin d'avoir des résultats satisfaisants).
+L'avantage de cette méthode est qu'elle est peu complexe (calculs sur quelques points remarquables sélectionnés) et facile à mettre en œuvre (2 images sont suffisantes afin d'avoir des résultats satisfaisants).\\
 
 Cette méthode se découpe en 3 étapes principales :
 \begin{enumerate}
@@ -51,25 +52,55 @@ Ce sont ces étapes que nous allons décrire dans ce document.
 
 \clearpage
 %----------------------------------------------------------------------------------------
-%	DÉTERMINATION DES CONTRAINTES À PARTIR DE L'HOMOGRAPHIE
+%	CALCUL DE LA MATRICE FONDAMENTALE
 %----------------------------------------------------------------------------------------
 
-\section{Homographie et contraintes}
+\section{Matrice fondamentale}
+
+\subsection{Matrice et produit vectoriel}
+
+Pour calculer le point d'intersection de deux droites, on doit se servir d'une opération appelée \em{produit vectoriel}.\\
+Celui-ci peut-être mis sous la forme d'une matrice de transformation :
+\begin{equation}
+  p \times q = p^\times \cdot q =>
+\end{equation}
+\begin{equation}
+  p^\times =
+  \begin{bmatrix}
+    0 & -p_z & p_y\\
+    p_z & 0 & -p_x\\
+    -p_y & p_x & 0
+  \end{bmatrix}
+\end{equation}
+
+Nous aurons besoin de cette matrice de transformation linéaire (ou homographie) afin de calculer la matrice fondamentale.
+
+\subsection{Calcul de la matrice fondamentale}
+
+\subsection{Équations des droites épipolaires}
 
 \clearpage
 %----------------------------------------------------------------------------------------
-%	DÉTERMINATION DE LA MATRICE INTRINSÈQUE
+%	EXTRACTION DES COINS
 %----------------------------------------------------------------------------------------
 
-\section{Matrice Intrinsèque}
+\section{Extraction des coins}
 
 
 \clearpage
 %----------------------------------------------------------------------------------------
-%	DÉTERMINATION DE LA MATRICE EXTRINSÈQUE
+%	CALCUL DES DISTANCES
 %----------------------------------------------------------------------------------------
 
-\section{Matrice Extrinsèque}
+\section{Calcul des distances}
+
+
+\clearpage
+%----------------------------------------------------------------------------------------
+%	MISE EN CORRESPONDANCE
+%----------------------------------------------------------------------------------------
+
+\section{Mise en correspondance}
 
 
 \clearpage
@@ -78,21 +109,6 @@ Ce sont ces étapes que nous allons décrire dans ce document.
 %----------------------------------------------------------------------------------------
 
 \section{Résultats}
-
-\subsection{Matrice Intrinsèque}
-
-\subsection{Matrices Extrinsèques}
-
-
-\clearpage
-%----------------------------------------------------------------------------------------
-%	CALIBRATION FOCALE
-%----------------------------------------------------------------------------------------
-
-\section{Zhang simplifié}
-
-
-
 
 \clearpage
 %----------------------------------------------------------------------------------------
