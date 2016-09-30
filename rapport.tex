@@ -25,10 +25,29 @@
 \subsection{Motivation}
 La photographie permet de récupérer et de conserver les données liées à une scène, à un instant donné. Cependant, les données récupérées correspondent à la projection de la scène sur un plan 2D. Par conséquent, nous observons une perte d'information, notamment au niveau de la profondeur.\\
 
-Il existe différents moyens de pallier à ce problème. Ceux-ci sont plus ou moins efficaces, et plus ou moins simples à mettre en œuvre.
+Il existe différents moyens de pallier à ce problème. Ceux-ci sont plus ou moins efficaces, et plus ou moins simples à mettre en œuvre.\\
+On peut diviser ces méthodes en 2 catégories :
+\begin{itemize}
+    \item Éparses : Une sélection de points est utilisée pour la mise en correspondance entre 2 images;
+    \item Denses : Tous les points d'une image sont mis en relation avec ceux d'une seconde image.
+\end{itemize}
 
+Parmi les méthodes éparses, nous trouvons la méthode de la stéréoscopie. C'est celle qui nous intéresse ici.
 
-\subsection{La Méthode de Zhang}
+\subsection{La mise en correspondance stéréoscopique}
+
+Cette méthode consiste à interpréter 2 (ou plus) projections d'une même scène, avec des points de vue différents afin d'estimer la profondeur des objets dans la-dite scène.\\
+
+L'avantage de cette méthode est qu'elle est peu complexe (calculs sur quelques points remarquables sélectionnés) et facile à mettre en œuvre (2 images sont suffisantes afin d'avoir des résultats satisfaisants).
+
+Cette méthode se découpe en 3 étapes principales :
+\begin{enumerate}
+  \item Identification des points et formes remarquables : appelés \em{features} ;
+  \item recherche de correspondance et appairage entre les features trouvées plus tôt ;
+  \item estimation de la profondeur et reconstitution 3D par triangulation.
+\end{enumerate}
+
+Ce sont ces étapes que nous allons décrire dans ce document.
 
 \clearpage
 %----------------------------------------------------------------------------------------
