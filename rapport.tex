@@ -101,7 +101,6 @@ Ce sont ces étapes que nous allons décrire dans ce document.
 \subsection{Matrice de produit vectoriel}
 
 \subsubsection{Explication}
-\label{subs:Explication}
 
 Pour calculer le point d'intersection de deux droites, on doit se servir d'une opération appelée {\em produit vectoriel}.\\
 Celui-ci peut-être mis sous la forme d'une matrice de transformation :
@@ -120,7 +119,6 @@ Celui-ci peut-être mis sous la forme d'une matrice de transformation :
 Nous aurons besoin de cette matrice de transformation linéaire (ou homographie) afin de calculer la matrice fondamentale.
 
 \subsubsection{Implémentation C++}
-\label{subs:Implémentation C++}
 
 \begin{lstlisting}
 // ---------------------------------------------------------
@@ -149,7 +147,6 @@ Mat iviVectorProductMatrix(const Mat& v) {
 \subsection{Calcul de la matrice fondamentale}
 
 \subsubsection{Explication}
-\label{subs:Explication}
 
 La matrice fondamentale se calcule en utilisant la formule suivante :
 \begin{equation}
@@ -159,7 +156,6 @@ La matrice fondamentale se calcule en utilisant la formule suivante :
 Cette formule a été implémentée en C++ et utilise la matrice de transformation précédemment décrite afin de calculer le produit vectoriel.
 
 \subsubsection{Implémentation C++}
-\label{subs:Implémentation C++}
 
 \begin{lstlisting}
 // ---------------------------------------------------------
@@ -261,22 +257,32 @@ Mat iviDetectCorners(const Mat& mImage,
 
 \section{Calcul des distances}
 
-\subsection{Explication}
+\subsection{Explications}
 
+\subsubsection{Calcul des droites épipolaires}
 Pour calculer les distances entre les points homologues dans les 2 images, il nous faut calculer, pour toutes les paires de points $m_{Left}$ et $m_{Right}$ possibles :
 \begin{itemize}
   \item La droite épipolaire de l'image droite associée à un point de l'image de gauche : $d_{Right} = Fm_{Left}$ ;
-  \item la droite épipolaire de l'image gauche associée à un point de l'image de droite : $d_{Left} = F^\top m_{Right}$ ;
+  \item la droite épipolaire de l'image gauche associée à un point de l'image de droite : $d_{Left} = F^\top m_{Right}$.
 \end{itemize}
+
+\subsubsection{Calcul et stockage des distances}
 
 Une fois en possession de ces données, nous devons calculer la distance euclidienne entre :
 \begin{itemize}
-  \item le point de l'image gauche et la droite épipolaire de l'image gauche associée au point de l'image droite : $dist_1 = /frac{|a_Lx_R + b_Ly_R + c_L|}{\sqrt{a_R^2 + b_R^2}}$;
-  \item le point de l'image droite et la droite épipolaire de l'image droite associée au point de l'image gauche : $dist_2 = /frac{|a_Rx_L + b_Ry_L + c_R|}{\sqrt{a_L^2 + b_L^2}}$.
+  \item le point de l'image gauche et la droite épipolaire de l'image gauche associée au point de l'image droite :
+  \begin{equation}
+    dist_1 = \frac{|a_Lx_R + b_Ly_R + c_L|}{\sqrt{a_R^2 + b_R^2}}
+  \end{equation}
+  \item le point de l'image droite et la droite épipolaire de l'image droite associée au point de l'image gauche :
+  \begin{equation}
+    dist_2 = \frac{|a_Rx_L + b_Ry_L + c_R|}{\sqrt{a_L^2 + b_L^2}}
+  \end{equation}
 \end{itemize}
 
 Finalement, on ajoutera à la matrice de distances la somme des distances euclidiennes calculées précedemment, et ce pour chaque paire.
 
+\clearpage
 \subsection{Implémentation C++}
 
 \begin{lstlisting}
@@ -342,6 +348,51 @@ Mat iviDistancesMatrix(const Mat& m2DLeftCorners,
 
 \section{Résultats}
 
+\subsection{Données}
+
+Nous disposons de ces deux images, ainsi que des matrices les décrivant, sous format xml.
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=170px]{left.png}
+\includegraphics[width=170px]{right.png}
+\end{center}
+\caption{Image gauche et Image droite}
+\end{figure}
+
+\subsection{Matrice fondamentale}
+
+Après la première étape, nous disposons de la matrice fondamentale suivante :
+\begin{equation}
+  \begin{bmatrix}
+    -4.57132e-15 & -1.87385e+01 &  4.49723e+03\\
+    -1.87384e+01 &  2.06585e-13 &  3.05726e+05\\
+    4.49722e+03 & -2.93733e+05 & -2.87822e+06
+  \end{bmatrix}
+\end{equation}
+
+\subsection{Coins et droites épipolaires}
+
+Nous pouvons distinguer sur ces images les droites épipolaires (en vert) et les points correspondants aux coins trouvés par la méthode Shi-Tomasi (en rouge).\\ (Images disponibles en annexe)
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=170px]{left-result.png}
+\includegraphics[width=170px]{right-result.png}
+\end{center}
+\caption{Coins et droites épipolaires}
+\end{figure}
+
+\subsection{Matrice des distances}
+
+Après calcul des distances, nous sommes en présence d'une matrice de distances de 32x32 contenant ces informations :
+\begin{equation}
+\begin{bmatrix}
+4.29133e-01 & 8.40214e+01 & 6.60562e+01 & 6.40529e+01 & ...\\
+8.39824e+01 & 3.90121e-01 & 1.81575e+01 & 2.01317e+01 & ...\\
+...
+\end{bmatrix}
+\end{equation}
+
 \clearpage
 %----------------------------------------------------------------------------------------
 
@@ -363,5 +414,28 @@ Nous pouvons imaginer que cette méthode soit intéressante dans le cadre de la 
 
 \clearpage
 %----------------------------------------------------------------------------------------
+
+\section{Annexe}
+
+\subsection{Résultats de la méthode Shi-Tomasi}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=450px]{left-result.png}
+\end{center}
+\caption{Coins et droites épipolaires - Image gauche}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=450px]{right-result.png}
+\end{center}
+\caption{Coins et droites épipolaires - Image droite}
+\end{figure}
+
+\clearpage
+\subsection{Fichier résultat après calcul des distances}
+
+\lstinputlisting{resultats_distances.txt}
+
 
 \end{document}

@@ -39,8 +39,8 @@ Mat iviDetectCorners(const Mat& mImage,
     vector<Point2f> vCorners;
 
     goodFeaturesToTrack(mImage, vCorners, iMaxCorners, 0.01, 10);
-
     Mat mCorners(3, int(vCorners.size()), CV_64F);
+
     for (unsigned int i = 0; i < vCorners.size(); i++) {
       mCorners.at<double>(0,i) = (double)vCorners[i].x;
       mCorners.at<double>(1,i) = (double)vCorners[i].y;
@@ -123,6 +123,7 @@ Mat iviDistancesMatrix(const Mat& m2DLeftCorners,
                        const Mat& m2DRightCorners,
                        const Mat& mFundamental) {
     // A modifier !
+
     Mat mDistances = Mat(m2DLeftCorners.cols, m2DRightCorners.cols, CV_64F);
 
         for(int i = 0; i < m2DLeftCorners.cols; i++) {
@@ -154,6 +155,7 @@ Mat iviDistancesMatrix(const Mat& m2DLeftCorners,
           }
         }
     return mDistances;
+
 }
 
 // -----------------------------------------------------------------------
