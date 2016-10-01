@@ -61,7 +61,6 @@ Mat iviVectorProductMatrix(const Mat& v) {
     double vy = v.at<double>(1);
     double vz = v.at<double>(2);
 
-    //Cours 2 p15, on créé le p*
     Mat mVectorProduct = (Mat_<double>(3, 3) <<
        0., -vz,  vy,
        vz,  0., -vx,

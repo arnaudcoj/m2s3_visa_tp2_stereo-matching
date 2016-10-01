@@ -261,6 +261,23 @@ Mat iviDetectCorners(const Mat& mImage,
 
 \section{Calcul des distances}
 
+\subsection{Explication}
+
+Pour calculer les distances entre les points homologues dans les 2 images, il nous faut calculer, pour toutes les paires de points $m_{Left}$ et $m_{Right}$ possibles :
+\begin{itemize}
+  \item La droite épipolaire de l'image droite associée à un point de l'image de gauche : $d_{Right} = Fm_{Left}$ ;
+  \item la droite épipolaire de l'image gauche associée à un point de l'image de droite : $d_{Left} = F^\top m_{Right}$ ;
+
+Une fois en possession de ces données, nous devons calculer la distance euclidienne entre :
+\begin{itemize}
+  \item le point de l'image gauche et la droite épipolaire de l'image gauche associée au point de l'image droite : $dist_1 = /frac{|a_Lx_R + b_Ly_R + c_L|}{\sqrt{a_R² + b_R²}}$;
+  \item le point de l'image droite et la droite épipolaire de l'image droite associée au point de l'image gauche : $dist_2 = /frac{|a_Rx_L + b_Ry_L + c_R|}{\sqrt{a_L² + b_L²}}$.
+\end{itemize}
+
+Finalement, on ajoutera à la matrice de distances la somme des distances euclidiennes calculées précedemment, et ce pour chaque paire.
+
+\subsection{Implémentation C++}
+
 \begin{lstlisting}
 // ---------------------------------------------------------
 /// \brief Initialise et calcule la matrice des distances entres les
@@ -315,6 +332,7 @@ Mat iviDistancesMatrix(const Mat& m2DLeftCorners,
 
 \section{Mise en correspondance}
 
+{\em Nous n'avons pas pu atteindre cette partie du tp.}
 
 \clearpage
 %----------------------------------------------------------------------------------------
@@ -331,6 +349,16 @@ Mat iviDistancesMatrix(const Mat& m2DLeftCorners,
 %----------------------------------------------------------------------------------------
 
 \section{Conclusion}
+
+Nous avons constaté qu'un des problèmes de la photographie est qu'elle ne permet pas de conserver certaines informations, en particulier les informations sur la profondeur.\\
+
+Nous avons donc choisi d'utiliser la méthode de la stéréoscopie, dont l'avantage est d'être peu complexe et facile à mettre en œuvre.\\
+
+Après application de cette méthode, nous avons été en mesure de mettre en relations des points remarquables dans des projections d'une même scène, avec différents points de vue. Une fois les paires de points formées, nous avons pu reconstituer partiellement l'information de profondeur de la scène en 3D.\\
+
+Cette méthode est cependant limitée par la qualité et la quantité des projections à disposition. De plus, nous ne pouvons pas reconstituer la totalité de la scène, car des objets pourront être cachés par d'autres objets.\\
+
+Nous pouvons imaginer que cette méthode soit intéressante dans le cadre de la réalité virtuelle, afin de pouvoir récupérer les informations 3D d'une scène vue par l'utilisateur, les traiter, et pouvoir, entre autres, placer des objets ou des informations dans la scène afin de créer de la réalité augmentée.\\
 
 \clearpage
 %----------------------------------------------------------------------------------------
