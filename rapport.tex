@@ -267,11 +267,12 @@ Pour calculer les distances entre les points homologues dans les 2 images, il no
 \begin{itemize}
   \item La droite épipolaire de l'image droite associée à un point de l'image de gauche : $d_{Right} = Fm_{Left}$ ;
   \item la droite épipolaire de l'image gauche associée à un point de l'image de droite : $d_{Left} = F^\top m_{Right}$ ;
+\end{itemize}
 
 Une fois en possession de ces données, nous devons calculer la distance euclidienne entre :
 \begin{itemize}
-  \item le point de l'image gauche et la droite épipolaire de l'image gauche associée au point de l'image droite : $dist_1 = /frac{|a_Lx_R + b_Ly_R + c_L|}{\sqrt{a_R² + b_R²}}$;
-  \item le point de l'image droite et la droite épipolaire de l'image droite associée au point de l'image gauche : $dist_2 = /frac{|a_Rx_L + b_Ry_L + c_R|}{\sqrt{a_L² + b_L²}}$.
+  \item le point de l'image gauche et la droite épipolaire de l'image gauche associée au point de l'image droite : $dist_1 = /frac{|a_Lx_R + b_Ly_R + c_L|}{\sqrt{a_R^2 + b_R^2}}$;
+  \item le point de l'image droite et la droite épipolaire de l'image droite associée au point de l'image gauche : $dist_2 = /frac{|a_Rx_L + b_Ry_L + c_R|}{\sqrt{a_L^2 + b_L^2}}$.
 \end{itemize}
 
 Finalement, on ajoutera à la matrice de distances la somme des distances euclidiennes calculées précedemment, et ce pour chaque paire.
