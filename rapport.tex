@@ -1,9 +1,50 @@
 \documentclass[a4paper]{article}
 
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage[frenchb]{babel}
 \usepackage{amsmath}
+\usepackage{listings}
+
+% define our color
+\usepackage{xcolor}
+
+% code color
+\definecolor{ligthyellow}{RGB}{250,247,220}
+\definecolor{darkblue}{RGB}{5,10,85}
+\definecolor{ligthblue}{RGB}{1,147,128}
+\definecolor{darkgreen}{RGB}{8,120,51}
+\definecolor{darkred}{RGB}{160,0,0}
+
+% other color
+\definecolor{ivi}{RGB}{141,107,185}
+
+
+\lstset{
+    language=scilab,
+    captionpos=b,
+    extendedchars=true,
+    frame=lines,
+    numbers=left,
+    numberstyle=\tiny,
+    numbersep=5pt,
+    keepspaces=true,
+    breaklines=true,
+    showspaces=false,
+    showstringspaces=false,
+    breakatwhitespace=false,
+    stepnumber=1,
+    showtabs=false,
+    tabsize=3,
+    basicstyle=\small\ttfamily,
+    backgroundcolor=\color{ligthyellow},
+    keywordstyle=\color{ligthblue},
+    morekeywords={include, printf, uchar},
+    identifierstyle=\color{darkblue},
+    commentstyle=\color{darkgreen},
+    stringstyle=\color{darkred},
+}
 
 \begin{document}
 
@@ -43,7 +84,7 @@ L'avantage de cette méthode est qu'elle est peu complexe (calculs sur quelques 
 
 Cette méthode se découpe en 3 étapes principales :
 \begin{enumerate}
-  \item Identification des points et formes remarquables : appelés \em{features} ;
+  \item Identification des points et formes remarquables : appelés {\em features} ;
   \item recherche de correspondance et appairage entre les features trouvées plus tôt ;
   \item estimation de la profondeur et reconstitution 3D par triangulation.
 \end{enumerate}
@@ -57,12 +98,15 @@ Ce sont ces étapes que nous allons décrire dans ce document.
 
 \section{Matrice fondamentale}
 
-\subsection{Matrice et produit vectoriel}
+\subsection{Matrice de produit vectoriel}
 
-Pour calculer le point d'intersection de deux droites, on doit se servir d'une opération appelée \em{produit vectoriel}.\\
+\subsubsection{Explication}
+\label{subs:Explication}
+
+Pour calculer le point d'intersection de deux droites, on doit se servir d'une opération appelée {\em produit vectoriel}.\\
 Celui-ci peut-être mis sous la forme d'une matrice de transformation :
 \begin{equation}
-  p \times q = p^\times \cdot q =>
+  p \times q = p^\times \cdot q
 \end{equation}
 \begin{equation}
   p^\times =
@@ -75,10 +119,99 @@ Celui-ci peut-être mis sous la forme d'une matrice de transformation :
 
 Nous aurons besoin de cette matrice de transformation linéaire (ou homographie) afin de calculer la matrice fondamentale.
 
+\subsubsection{Implémentation C++}
+\label{subs:Implémentation C++}
+
+\begin{lstlisting}
+// ---------------------------------------------------------
+/// \brief Initialise une matrice de produit vectoriel.
+///
+/// @param v: vecteur colonne (3 coordonnees)
+/// @return matrice de produit vectoriel
+// ---------------------------------------------------------
+Mat iviVectorProductMatrix(const Mat& v) {
+    double vx = v.at<double>(0);
+    double vy = v.at<double>(1);
+    double vz = v.at<double>(2);
+
+    Mat mVectorProduct = (Mat_<double>(3, 3) <<
+       0., -vz,  vy,
+       vz,  0., -vx,
+      -vy,  vx,  0.
+    );
+
+    // Retour de la matrice
+    return mVectorProduct;
+}
+\end{lstlisting}
+
+\clearpage
 \subsection{Calcul de la matrice fondamentale}
+
+\subsubsection{Explication}
+\label{subs:Explication}
+
+La matrice fondamentale se calcule en utilisant la formule suivante :
+\begin{equation}
+  F = (P_2O_1) ^\times P_2P_1^+
+\end{equation}
+
+Cette formule a été implémentée en C++ et utilise la matrice de transformation précédemment décrite afin de calculer le produit vectoriel.
+
+\subsubsection{Implémentation C++}
+\label{subs:Implémentation C++}
+
+\begin{lstlisting}
+// ---------------------------------------------------------
+/// \brief Initialise et calcule la matrice fondamentale.
+///
+/// @param mLeftIntrinsic: matrice intrinseque de la camera gauche
+/// @param mLeftExtrinsic: matrice extrinseque de la camera gauche
+/// @param mRightIntrinsic: matrice intrinseque de la camera droite
+/// @param mRightExtrinsic: matrice extrinseque de la camera droite
+/// @return matrice fondamentale
+// ---------------------------------------------------------
+Mat iviFundamentalMatrix(const Mat& mLeftIntrinsic,
+                         const Mat& mLeftExtrinsic,
+                         const Mat& mRightIntrinsic,
+                         const Mat& mRightExtrinsic) {
+
+    Mat reduc = (Mat_<double>(3,4) <<
+       1.0, 0.0, 0.0, 0.0,
+       0.0, 1.0, 0.0, 0.0,
+       0.0, 0.0, 1.0, 0.0
+       );
+    Mat pLeft = mLeftIntrinsic * reduc * mLeftExtrinsic;
+    Mat pRight = mRightIntrinsic * reduc * mRightExtrinsic;
+
+    Mat invPLeft = pLeft.inv(DECOMP_SVD);
+
+    Mat h = pRight * invPLeft;
+
+    Mat mInvLeftExtrinsic = mLeftExtrinsic.inv();
+
+    Mat o1 = mInvLeftExtrinsic.col(3);
+
+
+    // Doit utiliser la fonction iviVectorProductMatrix
+    Mat p201 = pRight * o1;
+    Mat p201x = iviVectorProductMatrix(p201);
+    Mat mFundamental =  p201x * pRight * invPLeft;
+    // Retour de la matrice fondamentale
+    return mFundamental;
+}
+\end{lstlisting}
 
 \subsection{Équations des droites épipolaires}
 
+Nous avons trouvé la matrice fondamentale. Prenons $c_g$, le centre de l'image de gauche, $c_d$ celui de l'image de droite, et $h_g$ le centre du côté haut de l'image de gauche.\\
+Nous pouvons déterminer les équations de différentes droites épipolaires :
+
+\begin{itemize}
+  \item La droite épipolaire de l'image droite associée au centre de l'image de gauche : $d_d = Fc_g$ ;
+  \item la droite épipolaire de l'image gauche associée au centre de l'image de droite : $d_g = F^\top c_d$ ;
+  \item la droite épipolaire de l'image droite associée au point situé au centre du côté haut de l'image de gauche (coordonnée v nulle) : $d_{dh} = ?$.
+\end{itemize}
 \clearpage
 %----------------------------------------------------------------------------------------
 %	EXTRACTION DES COINS
@@ -86,6 +219,40 @@ Nous aurons besoin de cette matrice de transformation linéaire (ou homographie)
 
 \section{Extraction des coins}
 
+\subsection{Méthode de Shi et Tomasi}
+Cette méthode permet de trouver les coins les plus remarquables dans une image.
+L'image doit être en nuances de gris et doit être spécifé, entre autres, le nombre de coins à trouver (N), ainsi qu'un seuil de qualité en dessous duquel un point ne sera pas considéré comme remarquable.\\
+
+Les coins seront ensuite triés par leur qualité, de façon décroissante. La fonction retournera finalement les N premiers coins, donc ceux avec la meilleure qualité.\\
+
+La méthode décrite ci-dessus est déjà implémentée dans la bibliothèque OpenCV, sous le nom de goodFeaturesToTrack(). Nous nous en servirons pour extraire les coins remarquables de l'image et les renvoyer sous forme de matrice 2D.
+
+\subsection{Implémentation C++}
+
+\begin{lstlisting}
+// ---------------------------------------------------------
+/// \brief Detecte les coins.
+///
+/// @param mImage: pointeur vers la structure image openCV
+/// @param iMaxCorners: nombre maximum de coins detectes
+/// @return matrice des coins
+// ---------------------------------------------------------
+Mat iviDetectCorners(const Mat& mImage,
+                     int iMaxCorners) {
+    vector<Point2f> vCorners;
+
+    goodFeaturesToTrack(mImage, vCorners, iMaxCorners, 0.01, 10);
+
+    Mat mCorners(3, int(vCorners.size()), CV_64F);
+    for (unsigned int i = 0; i < vCorners.size(); i++) {
+      mCorners.at<double>(0,i) = (double)vCorners[i].x;
+      mCorners.at<double>(1,i) = (double)vCorners[i].y;
+      mCorners.at<double>(2,i) = 1.;
+    }
+    // Retour de la matrice
+    return mCorners;
+}
+\end{lstlisting}
 
 \clearpage
 %----------------------------------------------------------------------------------------
@@ -94,6 +261,52 @@ Nous aurons besoin de cette matrice de transformation linéaire (ou homographie)
 
 \section{Calcul des distances}
 
+\begin{lstlisting}
+// ---------------------------------------------------------
+/// \brief Initialise et calcule la matrice des distances entres les
+/// points de paires candidates a la correspondance.
+///
+/// @param mLeftCorners: liste des points 2D image gauche
+/// @param mRightCorners: liste des points 2D image droite
+/// @param mFundamental: matrice fondamentale
+/// @return matrice des distances entre points des paires
+// ---------------------------------------------------------
+Mat iviDistancesMatrix(const Mat& m2DLeftCorners,
+                       const Mat& m2DRightCorners,
+                       const Mat& mFundamental) {
+  Mat mDistances = Mat(m2DLeftCorners.cols, m2DRightCorners.cols, CV_64F);
+
+  for(int i = 0; i < m2DLeftCorners.cols; i++) {
+    for(int j = 0; j < m2DRightCorners.cols; j++) {
+      Mat mLeft = m2DLeftCorners.col(i);
+      Mat mRight = m2DLeftCorners.col(j);
+      Mat dLeft = mFundamental * mLeft;
+      Mat dRight = mFundamental.t() * mRight;
+
+      double aRight = dRight.at<double>(0,0);
+      double bRight = dRight.at<double>(1,0);
+      double cRight = dRight.at<double>(2,0);
+
+      double xLeft = mLeft.at<double>(0,0);
+      double yLeft = mLeft.at<double>(1,0);
+
+      double aLeft = dLeft.at<double>(0,0);
+      double bLeft = dLeft.at<double>(1,0);
+      double cLeft = dLeft.at<double>(2,0);
+
+      double xRight = mRight.at<double>(0,0);
+      double yRight = mRight.at<double>(1,0);
+
+      double distance1 = fabs(aLeft * xRight + bLeft * yRight + cLeft) / sqrt(aRight * aRight + bRight * bRight);
+
+      double distance2 = fabs(aRight * xLeft + bRight * yLeft + cRight) / sqrt(aLeft * aLeft + bLeft * bLeft);
+
+      mDistances.at<double>(i,j) = distance1 + distance2;
+    }
+    }
+  return mDistances;
+}
+\end{lstlisting}
 
 \clearpage
 %----------------------------------------------------------------------------------------
